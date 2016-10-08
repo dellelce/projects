@@ -41,26 +41,34 @@ __phelp_idx()
 
 __pautoload()
 {
-  typeset topdir="${1}"
+ typeset topdir="${1}"
 
-  [ ! -d "${topdir}" ] && return 1
+ [ ! -d "${topdir}" ] && return 1
 
-  typeset autofile="${topdir}/.autoload"
+ typeset autofile="${topdir}/.autoload"
 
-  [ -s "${autofile}" ] &&
-   {
-     . "${autofile}"
-   }
+ [ -s "${autofile}" ] &&
+ {
+  . "${autofile}" $*
+ }
 
+ # Use AUTODIR for custom autoload directory
+ [ -z "$AUTODIR" ] &&
+ {
   typeset autodir="$topdir/.autoload.d"
-  typeset file=""
+ } ||
+ {
+  typeset autodir="$topdir/$AUTODIR"
+ }
 
-  [ ! -d "${autodir}" ] && return 0
+ typeset file=""
 
-  for file in $autodir/*.sh
-  do
-    [ -s "${file}" ] && . $file
-  done
+ [ ! -d "${autodir}" ] && return 0
+
+ for file in $autodir/*.sh
+ do
+  [ -s "${file}" ] && . $file $*
+ done
 }
 
 #
@@ -176,6 +184,7 @@ pload()
 
   [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
   [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
+  shift
 
   _pname="$(echo $_pname | tr ' ' '_')"
 
@@ -200,7 +209,7 @@ pload()
 #  echo "WARNING: should keep original directory if ptype = class" commented: 1704 101010
   cd "${fullpath}"
 
-  __pautoload "${fullpath}"
+  __pautoload "${fullpath}" $*
 
   # 1504 200610 - we don't want the following variables to stay
 
@@ -254,57 +263,57 @@ pdel()
 
 plist()
 {
+ # do it  
+ typeset _pext="proj"
+ typeset _urgfile=".URGENT"
+ typeset ldesc
+ typeset pname
 
-# do it  
-  typeset _pext="proj"
-  typeset _urgfile=".URGENT"
-  typeset ldesc
-  typeset pname
+ [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
 
-  [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
+ typeset item
+ typeset lista="${SAVEDIRS}/*.${_pext}"
 
-  typeset item
-  typeset lista="${SAVEDIRS}/*.${_pext}"
+ for item in $lista
+ do
+  [ ! -f "$item" ] && continue
+  . $item
 
-  for item in $lista
-  do
-     . $item
-     typeset _siz="${#pname}"
-     typeset _maxsiz=24
-     typeset _blanks=0
-     typeset _blstr=""
-     typeset _sep=" "
+  typeset _siz="${#pname}"
+  typeset _maxsiz=24
+  typeset _blanks=0
+  typeset _blstr=""
+  typeset _sep=" "
 
-     let _blanks="(( $_maxsiz - $_siz ))"
+  let _blanks="(( $_maxsiz - $_siz ))"
     
-     while [ $_blanks -ne 0 ] 
-     do
-      _blstr="${_blstr} "
-      let _blanks="(( $_blanks - 1 ))"
-      [ "$_blanks" -lt 0 ] && { echo "_maxsiz = " $_maxsiz " _siz = " $_siz; return 1; }
-     done
-     
-     [ -f "${fullpath}/${_urgfile}" ] && { _sep="[1m*[0m"; } 
-
-     [ "${ptype}" = "class" ] && 
-       {
-         typeset ldesc="[33m${fullpath}[0m"
-       } ||
-       {
-         typeset ldesc="${fullpath}"
-       }
-
-     echo "${pname}${_blstr} ${saved_time} ${saved_date} ${_sep} ${ldesc}"
-     unset ptype
-     unset ldesc
-#fixed: 1929 181010 : variables staed after end of plist
-     unset pclass
-     unset fullpath
-     unset saved_date
-     unset saved_time
-
+  while [ $_blanks -ne 0 ] 
+  do
+   _blstr="${_blstr} "
+   let _blanks="(( $_blanks - 1 ))"
+   [ "$_blanks" -lt 0 ] && { echo "_maxsiz = " $_maxsiz " _siz = " $_siz; return 1; }
   done
+     
+  [ -f "${fullpath}/${_urgfile}" ] && { _sep="[1m*[0m"; } 
 
+  [ "${ptype}" = "class" ] && 
+  {
+   typeset ldesc="[33m${fullpath}[0m"
+  } ||
+  {
+   typeset ldesc="${fullpath}"
+  }
+
+  echo "${pname}${_blstr} ${saved_time} ${saved_date} ${_sep} ${ldesc}"
+  unset ptype
+  unset ldesc
+#fixed: 1929 181010 : variables staed after end of plist
+  unset pclass
+  unset fullpath
+  unset saved_date
+  unset saved_time
+
+ done
 }
 
 #
@@ -437,9 +446,6 @@ EOF
   unset saved_time
   unset ptype
 #  unset fullpath       
-
-
-
   ## eof
 }
 
