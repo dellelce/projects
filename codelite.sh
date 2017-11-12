@@ -316,27 +316,6 @@ plist()
  done
 }
 
-#
-# pclass
-#
-# classes management function
-# added: 1258 140410
-# ---> not used anymore see 130910 version
-#
-#pclass()
-#{
-# typeset act="$1"
-#
-# [ -z "${act}" ] &&
-#  { 
-#   echo "pclass: action missing"
-#   return 1
-#  }
-##
-#  echo "function not completed"  
-#}
-
-
 
 #
 # phelp
