@@ -348,24 +348,23 @@ phelp()
 #
 # "project attributes management"
 #
-# created: 0150 090510
+# created: 090510
 #
 
 pattr()
 {
-  [ ! -d "${SRCCONFIG}" ] && { echo "Project configuration directory is invalid!"; return 1; }
+ [ ! -d "${SRCCONFIG}" ] && { echo "Project configuration directory is invalid!"; return 1; }
 
-  typeset _attrdir="${SRCCONFIG}/attributes"
+ typeset _attrdir="${SRCCONFIG}/attributes"
 
 # attributes/classes
 # attributes/quickload.sh <-- script to quickload attributes
 # attributes/values  	<-- attributes values
 
-  typeset _avdir="${_attrdir}/values"
-  typeset _acdir="${_attrdir}/classes"
+ typeset _avdir="${_attrdir}/values"
+ typeset _acdir="${_attrdir}/classes"
 
-  echo "function not completed"  
-
+ echo "function not completed"  
 }
 
 #
@@ -438,22 +437,21 @@ EOF
 
 pedit()
 {
-  typeset _pname="${1}"
-  typeset _pext="proj"
+ typeset _pname="${1}"
+ typeset _pext="proj"
 
-  [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
-  [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
+ [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
+ [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
 
-  _pname="$(echo $_pname | tr ' ' '_')"
+ _pname="$(echo $_pname | tr ' ' '_')"
 
-  typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
+ typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
 
-  [ ! -s "${_fpname}" ] && { echo "File invalid"; return 1; }
+ [ ! -s "${_fpname}" ] && { echo "File invalid"; return 1; }
 
-  vi "${_fpname}"
+ vi "${_fpname}"
 }
 
-####################################
 #####  ENVIRONMENT 
 #
 
@@ -461,64 +459,58 @@ pedit()
 #
 # penv
 #
-# added: 2048 071110
+# added: 071110
 #
 
   __phelp_idx penv
 
 penv()
 {
-  [ ! -d "${SRCCONFIG}" ] && { echo "SRCCONFIG not set"; return 1; } 
+ [ ! -d "${SRCCONFIG}" ] && { echo "SRCCONFIG not set"; return 1; } 
 
-  typeset _del=""
-  [ "$1" == "-d" ] && { typeset _del=1; shift; }
-  typeset _args="$*"
-  typeset _edir="${SRCCONFIG}/env"
-  typeset _awk="${SRCCONFIG}/scripts/awk/penv.awk"
+ typeset _del=""
+ [ "$1" == "-d" ] && { typeset _del=1; shift; }
+ typeset _args="$*"
+ typeset _edir="${SRCCONFIG}/env"
+ typeset _awk="${SRCCONFIG}/scripts/awk/penv.awk"
 
 
-  [ ! -d "${_edir}" ] && { echo "Invalid penv directory"; return 1; }
-  [ ! -s "${_awk}" ] && { echo "codefile is invalid"; return 1; }
+ [ ! -d "${_edir}" ] && { echo "Invalid penv directory"; return 1; }
+ [ ! -s "${_awk}" ] && { echo "codefile is invalid"; return 1; }
 
 #  [ -z "$_args" ] && { echo "show all vars not completed"; return 0; }
-  [ -z "$_args" ] && { penvlist; return $?; }
+ [ -z "$_args" ] && { penvlist; return $?; }
 
-  eval $(
-  echo "$*" | awk               \
-     -v del="${_del}"           \
-     -v envdir="${_edir}"       \
-     -f "${_awk}"
-  )
-
+ eval $(
+ echo "$*" | awk               \
+    -v del="${_del}"           \
+    -v envdir="${_edir}"       \
+    -f "${_awk}"
+ )
 }
-
 
 #
 # penvlist
 #
 
-  __phelp_idx penvlist
-
+ __phelp_idx penvlist
 
 penvlist()
 {
-  typeset _edir="${SRCCONFIG}/env"
-  typeset _postfix="env.txt"
+ typeset _edir="${SRCCONFIG}/env"
+ typeset _postfix="env.txt"
 
-  [ ! -d "${_edir}" ] && { echo "penvlist: no environment persistence directory"; return 1; }
-#
-  typeset item bitem
+ [ ! -d "${_edir}" ] && { echo "penvlist: no environment persistence directory"; return 1; }
 
-  for item in $_edir/*
-  do
-    [ ! -s "$item" ] && continue;
-    bitem=$(basename $item)
-    echo "${bitem%.${_postfix}}         $(< $item)"
-  done
+ typeset item bitem
 
+ for item in $_edir/*
+ do
+  [ ! -s "$item" ] && continue;
+  bitem=$(basename $item)
+  echo "${bitem%.${_postfix}}         $(< $item)"
+ done
 }
-
-
 
 ## EOF ##
 
