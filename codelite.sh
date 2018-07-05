@@ -9,11 +9,9 @@
 
 export SRCCONFIG="$HOME/.src"
 export SAVEDIRS="${SRCCONFIG}/savedirs"
-
 unset PHELP_IDX
 
 # 2050 221012 added SRC variable
-
 export SRC="$HOME/src"
 
 #
@@ -43,11 +41,7 @@ __pautoload()
  [ ! -d "${topdir}" ] && return 1
 
  typeset autofile="${topdir}/.autoload"
-
- [ -s "${autofile}" ] &&
- {
-  . "${autofile}" $*
- }
+ [ -s "${autofile}" ] && { . "${autofile}" $*; }
 
  # Use AUTODIR for custom autoload directory
  [ -z "$AUTODIR" ] &&
@@ -70,7 +64,7 @@ __pautoload()
 
 #
 # pskel
-# Being added 15:01 30/01/2010
+# Added 15:01 30/01/2010
 # Copies contents of current directory to skeleton directory
 #
 __pskel_save()
@@ -85,9 +79,8 @@ __pskel_save()
  }
 }
 
-###############################################
 #
-#
+# psave: save current direct as a "project"
 #
   __phelp_idx psave
 
@@ -158,8 +151,7 @@ EOF
 #
 # pload
 #
-# created: unknown
-# updated: 1459 200610 just adding this comment(!?)
+# created: 2010
 #
   __phelp_idx pload
 
@@ -182,12 +174,10 @@ pload()
   . "${_fpname}"
 
   # following two lines added 170x 101010
-
   [ "${ptype}" = "class" ] && { cd "${_cwd}"; }
   [ "${ptype}" != "class" ] && { PROJECT="${_pname}"; }
 
   # 1635 151010 - load parent class
-
   [ ! -z "${pclass}" ] && { typeset _p="$pclass"; unset pclass; pload "${_p}"; unset _p; }
 
   [ -z "${fullpath}" ] && { echo "fullpath not set!"; return 1; }
@@ -202,7 +192,6 @@ pload()
   __pautoload "${fullpath}"
 
   # 1504 200610 - we don't want the following variables to stay
-
   unset saved_date
   unset saved_time
   unset ptype
@@ -215,7 +204,7 @@ pload()
 }
 
 #
-# preload
+# preload: reload current project: useful if configuaration changed
 #
 preload()
 {
@@ -226,7 +215,7 @@ preload()
 }
 
 #
-#
+# pdel: remove project definition
 #
   __phelp_idx pdel
 
@@ -259,7 +248,7 @@ pdel()
 }
 
 #
-#
+# plist: list all projects in a tabular format
 #
   __phelp_idx plist
 
@@ -314,13 +303,10 @@ plist()
    unset saved_time
 
  done
-
 }
 
 #
-# phelp
-#
-# basic support for help
+# phelp: basic help
 #
 phelp()
 {
@@ -343,9 +329,7 @@ phelp()
 }
 
 #
-# pattr
-#
-# "project attributes management"
+# pattr: "project attributes management"
 #
 # created: 090510
 #
@@ -366,9 +350,7 @@ pattr()
 }
 
 #
-# pinfo
-#
-# reports information on requested project
+# pinfo: reports information on requested project
 #
 # created: 1509 200610
 #
@@ -466,11 +448,6 @@ cat << EOF
 ${fullpath}
 EOF
 
-#  unset fullpath
-  unset saved_date
-  unset saved_time
-
-# readded: 1345 181010
   unset saved_date
   unset saved_time
   unset ptype
@@ -479,7 +456,7 @@ EOF
   ## eof
 }
 
-# pedit
+# pedit: open project definition in an editor
 #
 # Added: 1318 181010
 
@@ -489,6 +466,7 @@ pedit()
 {
   typeset _pname="${1}"
   typeset _pext="proj"
+  typeset rc=0
 
   [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
   [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
@@ -499,12 +477,16 @@ pedit()
 
   [ ! -s "${_fpname}" ] && { echo "File invalid"; return 1; }
 
-  vim "${_fpname}"
+  [ -z "$EDITOR" ] && { vim "${_fpname}"; rc=$?; } || { $EDITOR "${_fpname}"; rc=$?; }
+
+  return $rc
 }
 
 #####  ENVIRONMENT #####
 
-# penv
+# penv: set environment for project
+#
+#
 #
 # added: 2048 071110
 #
@@ -531,7 +513,6 @@ penv()
      -v envdir="${_edir}"       \
      -f "${_awk}"
   )
-
 }
 
 
@@ -560,6 +541,8 @@ penvlist()
 # pvenv
 #
 # add a Python3 virtualenv in current project
+#
+# Created: June 2018
 #
 pvenv()
 {
