@@ -63,26 +63,6 @@ __pautoload()
 }
 
 #
-# pskel
-# added 30/01/2010
-# Copies contents of current directory to skeleton directory
-#
-
-__pskel_save()
-{
- typeset srcskel="$1"
- typeset destdir="$2"
- typeset skelname="$3"
-
- [ -z "$skelname" ] &&
- {
-   return 1
- }
-
- echo "Warning: Uncomplete!"
-}
-
-#
 # psave: save current direct as a "project"
 #
   __phelp_idx psave
@@ -332,28 +312,6 @@ phelp()
 }
 
 #
-# pattr: "project attributes management"
-#
-# created: 090510
-#
-pattr()
-{
-  [ ! -d "${SRCCONFIG}" ] && { echo "Project configuration directory is invalid!"; return 1; }
-
-  typeset _attrdir="${SRCCONFIG}/attributes"
-
-# attributes/classes
-# attributes/quickload.sh <-- script to quickload attributes
-# attributes/values  	<-- attributes values
-
-  typeset _avdir="${_attrdir}/values"
-  typeset _acdir="${_attrdir}/classes"
-
-  echo "function not completed"
-
-}
-
-#
 # pinfo: reports information on requested project
 #
 # created: 200610
@@ -529,23 +487,6 @@ penvlist()
     bitem=$(basename $item)
     echo "${bitem%.${_postfix}}         $(< $item)"
   done
-}
-
-# pvenv
-#
-# add a Python3 virtualenv in current project
-#
-# Created: June 2018
-#
-pvenv()
-{
- # find out in a project (check PROJECT & PROJECT_HOME directory)
- # NO: abort
- [ -z "$PROJECT" -o -z "$PROJECT_HOME" ] && { echo "not in a project"; return 1; }
- # build virtualenv dir name for
- # find out python3 version (python -V)
-
- echo "work in progress"
 }
 
 ## EOF ##
