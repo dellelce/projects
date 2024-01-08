@@ -4,11 +4,11 @@
 # 1540 140310 adding support for loading project scripts (_pautoload)
 # 1459 300310 adding support basic "skel" of directories
 # 1521 070410 adding basic support for phelp
-# xxxx 070313 introducing pvenv and PROJECT_HOME
 #
 
 export SRCCONFIG="$HOME/.src"
 export SAVEDIRS="${SRCCONFIG}/savedirs"
+
 unset PHELP_IDX
 
 # 2050 221012 added SRC variable
@@ -55,18 +55,19 @@ __pautoload()
  typeset file=""
 
  [ ! -d "${autodir}" ] && return 0
+ for file in $autodir/*.sh; do [ -s "${file}" ] && . $file $*; done
 
- for file in $autodir/*.sh
- do
-  [ -s "${file}" ] && . $file
- done
+ typeset welcomedir="$topdir/.welcome.d"
+ [ ! -d "${welcomedir}" ] && return 0
+ for file in $welcomedir/*.sh; do [ -s "${file}" ] && . $file $*; done
 }
 
 #
 # pskel
-# Added 15:01 30/01/2010
+# added 30/01/2010
 # Copies contents of current directory to skeleton directory
 #
+
 __pskel_save()
 {
  typeset srcskel="$1"
@@ -75,8 +76,10 @@ __pskel_save()
 
  [ -z "$skelname" ] &&
  {
-  return 1
+   return 1
  }
+
+ echo "Warning: Uncomplete!"
 }
 
 #
@@ -86,20 +89,21 @@ __pskel_save()
 
 psave()
 {
- typeset _ppath="${PWD}"
- typeset _pname="${1}"
- typeset _pext="proj"
+  typeset _ppath="${PWD}"
+  typeset _pname="${1}"
+  typeset _pext="proj"
 
- [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
- [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
+  [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
+  [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
 
- _pname="$(echo $_pname | tr ' ' '_')"
+  _pname="$(echo $_pname | tr ' ' '_')"
 
- typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
+  typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
 
- [ -s "${_fpname}" ] && { echo "Project already exists: ${_fpname}"; return 1; }
+  [ -s "${_fpname}" ] && { echo "Project already exists: ${_fpname}"; return 1; }
 
- cat > "${_fpname}" << EOF
+cat > "${_fpname}" << EOF
+#
 #
 saved_time="$(date +%H%M)"
 saved_date="$(date +%d%m%Y)"
@@ -108,13 +112,13 @@ pname="${_pname}"
 ptype="project"
 EOF
 
- return $?
+  return $?
 }
 
 #
 # pclass
 #
-# created: 0039 130910
+# Created: 130910
 #
 # Create a new "project class" based on current directory
 #
@@ -164,6 +168,7 @@ pload()
 
   [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
   [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
+  shift
 
   _pname="$(echo $_pname | tr ' ' '_')"
 
@@ -188,8 +193,7 @@ pload()
 
 #  echo "WARNING: should keep original directory if ptype = class" commented: 1704 101010
   cd "${fullpath}"
-
-  __pautoload "${fullpath}"
+  __pautoload "${fullpath}" $*
 
   # 1504 200610 - we don't want the following variables to stay
   unset saved_date
@@ -203,7 +207,6 @@ pload()
   ## eof()
 }
 
-#
 # preload: reload current project: useful if configuaration changed
 #
 preload()
@@ -221,30 +224,29 @@ preload()
 
 pdel()
 {
- typeset _pname="${1}"
- typeset _pext="proj"
+  typeset _pname="${1}"
+  typeset _pext="proj"
 
- [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
- [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
- shift
+  [ ! -d "${SAVEDIRS}" ] && { echo "Save directory is invalid!"; return 1; }
+  [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
 
- _pname="$(echo $_pname | tr ' ' '_')"
+  _pname="$(echo $_pname | tr ' ' '_')"
 
- typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
+  typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
 
- [ ! -s "${_fpname}" ] && { echo "Project does not exist: ${_fpname}"; return 1; }
+  [ ! -s "${_fpname}" ] && { echo "Project does not exist: ${_fpname}"; return 1; }
 
- echo "Project file for ${_pname} is ${_fpname}"
+  echo "Project file for ${_pname} is ${_fpname}"
 
- rm "${_fpname}" &&
- {
-  echo "File successfully removed"
- } ||
- {
-  echo "Failed to remove file"
- }
+  rm "${_fpname}" &&
+  {
+    echo "File successfully removed"
+  } ||
+  {
+    echo "Failed to remove file"
+  }
 
- ## eof()
+  ## eof()
 }
 
 #
@@ -267,20 +269,22 @@ plist()
 
  for item in $lista
  do
-  . $item
-  typeset _siz="${#pname}"
-  typeset _maxsiz=24
-  typeset _blanks=0
-  typeset _blstr=""
-  typeset _sep=" "
+   [ ! -f "$item" ] && continue
+   . $item
 
-  let _blanks="(( $_maxsiz - $_siz ))"
+   typeset _siz="${#pname}"
+   typeset _maxsiz=24
+   typeset _blanks=0
+   typeset _blstr=""
+   typeset _sep=" "
+
+   let _blanks="(( $_maxsiz - $_siz ))"
 
    while [ $_blanks -ne 0 ]
    do
-    _blstr="${_blstr} "
-    let _blanks="(( $_blanks - 1 ))"
-    [ "$_blanks" -lt 0 ] && { echo "_maxsiz = " $_maxsiz " _siz = " $_siz; return 1; }
+     _blstr="${_blstr} "
+     let _blanks="(( $_blanks - 1 ))"
+     [ "$_blanks" -lt 0 ] && { echo "_maxsiz = " $_maxsiz " _siz = " $_siz; return 1; }
    done
 
    [ -f "${fullpath}/${_urgfile}" ] && { _sep="[1m*[0m"; }
@@ -301,7 +305,6 @@ plist()
    unset fullpath
    unset saved_date
    unset saved_time
-
  done
 }
 
@@ -311,10 +314,10 @@ plist()
 phelp()
 {
  [ -z "${PHELP_IDX}" ] &&
- {
-   echo "PHelp support not installed."
-   return 1;
- }
+  {
+    echo "PHelp support not installed."
+    return 1;
+  }
 
  typeset item
 
@@ -335,24 +338,25 @@ phelp()
 #
 pattr()
 {
- [ ! -d "${SRCCONFIG}" ] && { echo "Project configuration directory is invalid!"; return 1; }
+  [ ! -d "${SRCCONFIG}" ] && { echo "Project configuration directory is invalid!"; return 1; }
 
- typeset _attrdir="${SRCCONFIG}/attributes"
+  typeset _attrdir="${SRCCONFIG}/attributes"
 
 # attributes/classes
 # attributes/quickload.sh <-- script to quickload attributes
 # attributes/values  	<-- attributes values
 
- typeset _avdir="${_attrdir}/values"
- typeset _acdir="${_attrdir}/classes"
+  typeset _avdir="${_attrdir}/values"
+  typeset _acdir="${_attrdir}/classes"
 
- echo "function not completed"
+  echo "function not completed"
+
 }
 
 #
 # pinfo: reports information on requested project
 #
-# created: 1509 200610
+# created: 200610
 #
   __phelp_idx pinfo
 
@@ -380,7 +384,6 @@ pinfo()
   _pname="$(echo $_pname | tr ' ' '_')"
 
   typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
-
   [ ! -s "${_fpname}" ] && { echo "Project does not exist: ${_fpname}"; return 1; }
 
   unset fullpath
@@ -398,19 +401,16 @@ EOF
 #  unset saved_date
 #  unset saved_time
 
-# readded: 1345 181010
+# readded: 181010
   unset saved_date
   unset saved_time
   unset ptype
 #  unset fullpath
-
   ## eof
 }
 
 #
 # pdir
-#
-# created: 1301 25014
 #
   __phelp_idx pdir
 
@@ -456,10 +456,10 @@ EOF
   ## eof
 }
 
+#
 # pedit: open project definition in an editor
 #
 # Added: 1318 181010
-
   __phelp_idx pedit
 
 pedit()
@@ -472,23 +472,17 @@ pedit()
   [ -z "${_pname}" ] && { echo "Project name is missing!"; return 1; }
 
   _pname="$(echo $_pname | tr ' ' '_')"
-
   typeset _fpname="${SAVEDIRS}/${_pname}.${_pext}"
 
   [ ! -s "${_fpname}" ] && { echo "File invalid"; return 1; }
-
   [ -z "$EDITOR" ] && { vim "${_fpname}"; rc=$?; } || { $EDITOR "${_fpname}"; rc=$?; }
 
   return $rc
 }
 
-#####  ENVIRONMENT #####
-
-# penv: set environment for project
+# penv
 #
-#
-#
-# added: 2048 071110
+# added: 071110
 #
   __phelp_idx penv
 
@@ -504,7 +498,6 @@ penv()
 
   [ ! -d "${_edir}" ] && { echo "Invalid penv directory"; return 1; }
   [ ! -s "${_awk}" ] && { echo "codefile is invalid"; return 1; }
-
   [ -z "$_args" ] && { penvlist; return $?; }
 
   eval $(
@@ -513,13 +506,13 @@ penv()
      -v envdir="${_edir}"       \
      -f "${_awk}"
   )
-}
 
+}
 
 #
 # penvlist
 #
-__phelp_idx penvlist
+  __phelp_idx penvlist
 
 penvlist()
 {
@@ -527,7 +520,7 @@ penvlist()
   typeset _postfix="env.txt"
 
   [ ! -d "${_edir}" ] && { echo "penvlist: no environment persistence directory"; return 1; }
-#
+
   typeset item bitem
 
   for item in $_edir/*
@@ -552,7 +545,6 @@ pvenv()
  # build virtualenv dir name for
  # find out python3 version (python -V)
 
- #
  echo "work in progress"
 }
 
