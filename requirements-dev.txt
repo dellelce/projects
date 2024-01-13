@@ -1,0 +1,8 @@
+flake8
+flake8-docstrings
+flake8-import-order
+flake8-annotations
+yapf==0.27.0
+pyyaml
+black
+icecream
