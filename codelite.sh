@@ -54,8 +54,7 @@ __pautoload()
 
  typeset file=""
 
- [ ! -d "${autodir}" ] && return 0
- for file in $autodir/*.sh; do [ -s "${file}" ] && . $file $*; done
+ [ -d "${autodir}" ] && { for file in $autodir/*.sh; do [ -s "${file}" ] && . $file $*; done; }
 
  typeset welcomedir="$topdir/.welcome.d"
  [ ! -d "${welcomedir}" ] && return 0
