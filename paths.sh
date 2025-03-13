@@ -4,7 +4,7 @@
 # Description:  setup paths
 #
 
-### FUNCTIONS ###
+## FUNCTIONS ##
 
 loadvenv()
 {
@@ -17,21 +17,43 @@ loadvenv()
  return $?
 }
 
-### ENV ###
-
- [ -d "$PWD/py" ] && { export PYTHONPATH="$PWD/py"; }
-
- for dir in "$PWD/sh" "$PWD/bin"
- do
-   [ -d "$dir" -a $(echo "$PATH" | grep -c "$dir") -eq 0 ] && { export PATH="$dir:$PATH"; }
- done
+findvenv()
+{
+ typeset dir
 
  for dir in *-env
  do
    # load only the first....
    [ -d "$dir" -a -s "$dir/bin/activate" ] && { loadvenv "$dir"; break; }
  done
+}
 
- unset dir
+safeaddpath()
+{
+  typeset dir
 
-### EOF ###
+  for dir in $*
+  do
+   [ -d "$dir" -a $(echo "$PATH" | grep -c "$dir") -eq 0 ] && { export PATH="$dir:$PATH"; }
+  done
+}
+
+pypath()
+{
+  typeset dir="$1"
+
+  [ ! -d "$dir" ] && return 2; # sanity check
+
+  # quick: if PYTHONPATH not set go easy
+  [ -z "$PYTHONPATH" ] && { export PYTHONPATH="$dir"; return 0; }
+
+  [ $(echo "$PYTHONPATH" | grep -c "$dir") -eq 0 ] && export PYTHONPATH="$PYTHONPATH:$dir"
+}
+
+## MAIN ##
+
+ pypath "$PWD/py"
+ safeaddpath "$PWD/sh" "$PWD/bin"
+ findvenv
+
+## EOF ##
