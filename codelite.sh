@@ -30,30 +30,22 @@ __phelp_idx()
 
 #
 # __pautoload
-#
 # created: 042010
-# updated: 1502 200610 just header comment
 #
 __pautoload()
 {
  typeset topdir="${1}"
-
  [ ! -d "${topdir}" ] && return 1
+
+ typeset autodir="$topdir/.autoload.d"
 
  typeset autofile="${topdir}/.autoload"
  [ -s "${autofile}" ] && { . "${autofile}" $*; }
 
  # Use AUTODIR for custom autoload directory
- [ -z "$AUTODIR" ] &&
- {
-  typeset autodir="$topdir/.autoload.d"
- } ||
- {
-  typeset autodir="$topdir/$AUTODIR"
- }
+ [ ! -z "$AUTODIR" ] && { typeset autodir="$topdir/$AUTODIR"; }
 
  typeset file=""
-
  [ -d "${autodir}" ] && { for file in $autodir/*.sh; do [ -s "${file}" ] && . $file $*; done; }
 
  typeset welcomedir="$topdir/.welcome.d"
@@ -168,7 +160,7 @@ pload()
   [ ! -d "${fullpath}" ] && { echo "fullpath is not valid!"; return 1; }
 
   # 070316: if not a class save directory in PROJECT_HOME
-  [ "${ptype}" != "class" ] && { PROJECT_HOME="${fullpath}"; }
+  [ "${ptype}" != "class" ] && { export PROJECT_HOME="${fullpath}"; }
 
 #  echo "WARNING: should keep original directory if ptype = class" commented: 1704 101010
   cd "${fullpath}"
