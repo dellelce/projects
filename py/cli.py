@@ -1,31 +1,58 @@
+#!/bin/env python
+
 """Command Line Interface to "projects" class."""
 
-from os.path import isdir
+from os.path import isdir  # used to check if "fullpath" exists.
 
 
-def info(pdb, name):
+def info(pdb, args):
     """Return details specified projects.
 
-    Original shell format:
+    fullpath:    /home/antonio/projects/projects
+    saved_date:  15112023
+    saved_time:  0239
+    ptype:       project
 
-    echo "${pname}${_blstr} ${saved_time} ${saved_date} ${_sep} ${ldesc}";
+    note: currently not implementing ptype as "project classes" were never fully developed.
 
-    example:
-
-    woppy                    1921 14062019   /root/projects/woppy
     """
+    name = args[0]
     proj = pdb.db[name]
 
-    return "{name:24} {time} {date} {path} ".format(
-        name=proj["pname"],
+    return """
+fullpath:   {path}
+saved_date: {date}
+saved_time: {time}
+ptype:      project
+""".format(
         time=proj["saved_time"],
         date=proj["saved_date"],
         path=proj["fullpath"],
     )
 
 
-def pload(pdb, name):
-    """Create shell instruction for "loading" a project."""
+""" this was from plist not pinfo
+    woppy                    1921 14062019   /root/projects/woppy
+"""
+
+
+def load(pdb, args) -> []:
+    """
+    Create shell instruction for "loading" a project.
+
+    - Sanity tests
+    - Load project definition
+    - uncertain bit:   [ "${ptype}" = "class" ] && { cd "${_cwd}"; };
+    - set PROJECT environment variable
+    - [classes not implemented initially] if pclass is set should load it as a class
+    - sanity checks on fullpath
+    - write to stdout: "cd $fullpath"
+    - set PROJECT_HOME environment variable [if not a class]
+    - write to stdout: "__pautoload $fullpath"
+    - update "lastproject" environment [How?]
+    """
+
+    name = args[0]
     pstr = []
     error = ""
     project = pdb.get(name)
@@ -71,6 +98,9 @@ def pload(pdb, name):
     #    return 1
     # };
     # cd "${fullpath}";
+    if isdir(fullpath):
+        pstr.append(f'export PROJECT_HOME="{fullpath}"')
+        pstr.append(f'cd "{fullpath}"')
 
     # Load "autoload" -> thi is a shell thing, will stay as a shell function
     # __pautoload "${fullpath}" $*;
@@ -87,14 +117,52 @@ def pload(pdb, name):
     return pstr
 
 
-def pdel(pdb, name):
+def delete(pdb, args):
     """Remove entry from projects. Will not remove the base directory."""
-    pstr = []
+    name = args[0]
     project = pdb.get(name)
 
     if not project:
-        pstr.append(f'export ERROR="{name}: project does not exist."')
-        pstr.append("echo $ERROR")
-        return pstr
+        print(f"{name} does not exist.")
 
-    del pdb[name]
+    #del pdb[name]
+
+
+def save(pdb, args) -> None:
+    name = args[0]
+
+    if pdb.get(name) is not None:
+        print(f"project {name} already exists.")
+    else:
+        print(f"project does not exists but there is no code")
+
+
+def hello(pdb, args) -> None:
+    print(pdb)
+
+    for arg in args:
+        print(pdb[arg])
+
+
+if __name__ == "__main__":
+    from sys import argv
+    from legacy import projects
+
+    args = argv[1::]
+    action_name = args[0]
+    args.pop(0)
+
+    action = globals().get(action_name, None)
+
+    # load is a special case
+    if action_name != "pload" and action is None:
+        print(f"action {action_name} not defined.")
+        exit(1)
+
+    pdb = projects()
+
+    if callable(action):
+        output = action(pdb, args)
+
+        if type(output) is list:
+            print(";".join(output))
