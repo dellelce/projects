@@ -1,21 +1,15 @@
-#
 # penv
 #
 # Based on "jenv"
-
-#
 
 ## "local" doc:
 #
 #  split (some_string, array_var [, field-seperator])
 #
-# 
  BEGIN \
  {
-# (set by -v option)      postfix=ENVIRON["envpostix"];
-
-  if (postfix=="") postfix="env.txt";
-  if (envdir=="") envdir=ENVIRON["SRCCONFIG"];
+   if (postfix=="") postfix="env.txt";
+   if (envdir=="") envdir=ENVIRON["SRCCONFIG"];
  }
 
  {
@@ -39,12 +33,6 @@
    {
     printf "echo %s > %s\n", value, envfile;
    }
-
-#        print in_cnt;
-#	print "in_a[1] = " in_a[1];
-#	print "in_a[2] = " in_a[2];
-
  }
-
 
 ## EOF ##
