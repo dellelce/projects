@@ -1,9 +1,9 @@
 #
-# code lite v0.0.0
+# code lite
 #
-# 1540 140310 adding support for loading project scripts (_pautoload)
-# 1459 300310 adding support basic "skel" of directories
-# 1521 070410 adding basic support for phelp
+# 140310 adding support for loading project scripts (_pautoload)
+# 300310 adding support basic "skel" of directories
+# 070410 adding basic support for phelp
 #
 
 export SRCCONFIG="$HOME/.src"
@@ -11,7 +11,7 @@ export SAVEDIRS="${SRCCONFIG}/savedirs"
 
 unset PHELP_IDX
 
-# 2050 221012 added SRC variable
+# 221012 added SRC variable
 export SRC="$HOME/src"
 
 #
@@ -149,7 +149,7 @@ pload()
 
   . "${_fpname}"
 
-  # following two lines added 170x 101010
+  # following two lines added 101010
   [ "${ptype}" = "class" ] && { cd "${_cwd}"; }
   [ "${ptype}" != "class" ] && { PROJECT="${_pname}"; }
 
@@ -170,7 +170,7 @@ pload()
   unset saved_date
   unset saved_time
   unset ptype
-#  unset fullpath	# unset added: 1338 181010
+#  unset fullpath	# unset added: 181010
 
   # save last project call
   penv lastproject="$1"
@@ -271,7 +271,7 @@ plist()
    echo "${pname}${_blstr} ${saved_time} ${saved_date} ${_sep} ${ldesc}"
    unset ptype
    unset ldesc
-#fixed: 1929 181010 : variables staed after end of plist
+#fixed: 181010 : variables staed after end of plist
    unset pclass
    unset fullpath
    unset saved_date
